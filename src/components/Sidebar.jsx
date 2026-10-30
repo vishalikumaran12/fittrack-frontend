@@ -1,3 +1,5 @@
+
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -6,6 +8,7 @@ import {
   Dumbbell,
   Lightbulb,
   HeartPulse,
+  ShieldCheck,
 } from "lucide-react";
 
 const menuItems = [
@@ -17,9 +20,33 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    try {
+      const user = JSON.parse(
+        localStorage.getItem("fittrack-current-user") || "null"
+      );
+
+      setIsAdmin(user?.role === "admin");
+    } catch {
+      setIsAdmin(false);
+    }
+  }, []);
+
+  const navigationItems = isAdmin
+    ? [
+        ...menuItems,
+        {
+          name: "Admin Dashboard",
+          path: "/admin",
+          icon: ShieldCheck,
+        },
+      ]
+    : menuItems;
+
   return (
     <aside className="flex h-screen w-16 shrink-0 flex-col border-r border-gray-200 bg-white p-2 sm:w-64 sm:p-5">
-      {/* Logo */}
       <div className="mb-10 flex items-center gap-3">
         <div className="rounded-xl bg-violet-600 p-2 text-white">
           <HeartPulse size={25} />
@@ -35,20 +62,18 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Navigation */}
       <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
         Menu
       </p>
 
       <nav className="flex flex-col gap-2">
-        {menuItems.map((item) => {
+        {navigationItems.map((item) => {
           const Icon = item.icon;
 
           return (
             <NavLink
               key={item.path}
               to={item.path}
-              end={item.path === "/"}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                   isActive
@@ -64,7 +89,6 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom section */}
       <div className="mt-auto rounded-2xl bg-violet-50 p-4">
         <p className="font-semibold text-violet-900">
           Keep moving!
